@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python to Java Translator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
     <style>
         :root {
             --carbon-black: #1a1a1a;
@@ -68,6 +75,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        /* CodeMirror Customization */
+        .CodeMirror {
+            height: 350px;
+            border-radius: 5px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .CodeMirror-focused {
+            border-color: var(--red);
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
+
+        .CodeMirror-gutters {
+            border-right: 1px solid rgba(255,255,255,0.1);
+            background-color: #1e1e1e;
+        }
+
+        .CodeMirror-linenumber {
+            color: #666;
         }
 
         textarea {
@@ -179,7 +210,7 @@
     <div class="container">
         <div class="code-area">
             <h2><i class="fab fa-python"></i> Python Code</h2>
-            <textarea id="pythonCode" placeholder="Enter your Python code here...">def calculate_sum(numbers: list) -> int:
+            <textarea id="pythonCode">def calculate_sum(numbers: list) -> int:
     total = 0
     for num in numbers:
         total += num
@@ -203,14 +234,48 @@ result = calculate_sum(test_numbers)</textarea>
     </div>
 
     <script>
+        // Initialize CodeMirror
+        var editor = CodeMirror.fromTextArea(document.getElementById("pythonCode"), {
+            mode: "python",
+            theme: "dracula",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseBrackets: true,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            lineWrapping: true,
+            extraKeys: {
+                "Tab": function(cm) {
+                    if (cm.somethingSelected()) {
+                        cm.indentSelection("add");
+                    } else {
+                        cm.replaceSelection("    ", "end");
+                    }
+                }
+            }
+        });
+
+        // Initialize output area with CodeMirror (read-only)
+        var outputEditor = CodeMirror(function(node) {
+            var javaCode = document.getElementById("javaCode");
+            javaCode.parentNode.replaceChild(node, javaCode);
+        }, {
+            mode: "text/x-java",
+            theme: "dracula",
+            lineNumbers: true,
+            readOnly: true,
+            matchBrackets: true,
+            value: "Translation will appear here...",
+            lineWrapping: true
+        });
+
         function translateCode() {
-            const pythonCode = document.getElementById('pythonCode').value;
-            const javaCodeElement = document.getElementById('javaCode');
-            const differencesList = document.getElementById('differencesList');
+            const pythonCode = editor.getValue();
             
             // Add loading state
-            javaCodeElement.innerHTML = 'Translating...';
-            differencesList.innerHTML = '<div class="loading">Analyzing differences...</div>';
+            outputEditor.setValue('Translating...');
+            document.getElementById('differencesList').innerHTML = '<div class="loading">Analyzing differences...</div>';
             
             fetch('/translate', {
                 method: 'POST',
@@ -222,10 +287,12 @@ result = calculate_sum(test_numbers)</textarea>
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    javaCodeElement.innerHTML = data.highlighted_java || data.java_code;
+                    // Set the Java code with syntax highlighting
+                    outputEditor.setValue(data.java_code);
+                    outputEditor.setOption('mode', 'text/x-java');
                     
                     // Display semantic differences
-                    differencesList.innerHTML = data.semantic_differences
+                    document.getElementById('differencesList').innerHTML = data.semantic_differences
                         .map(diff => `
                             <div class="difference-item">
                                 <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
@@ -235,13 +302,13 @@ result = calculate_sum(test_numbers)</textarea>
                         `)
                         .join('');
                 } else {
-                    javaCodeElement.innerHTML = `<span style="color: var(--red);">Error: ${data.message}</span>`;
-                    differencesList.innerHTML = '';
+                    outputEditor.setValue(`Error: ${data.message}`);
+                    document.getElementById('differencesList').innerHTML = '';
                 }
             })
             .catch(error => {
-                javaCodeElement.innerHTML = `<span style="color: var(--red);">Error: ${error.message}</span>`;
-                differencesList.innerHTML = '';
+                outputEditor.setValue(`Error: ${error.message}`);
+                document.getElementById('differencesList').innerHTML = '';
             });
         }
     </script>
