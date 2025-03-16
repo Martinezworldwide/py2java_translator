@@ -277,6 +277,7 @@ result = calculate_sum(test_numbers)</textarea>
             <div class="sample-selector">
                 <select id="sampleSelector" onchange="loadSample()">
                     <option value="">Select a sample...</option>
+                    <option value="custom">0. Custom Code (Enter your own)</option>
                     <option value="basic">1. Basic Arithmetic and Variables</option>
                     <option value="conditional">2. Conditional Statements</option>
                     <option value="loops">3. Loops (For and While)</option>
@@ -293,6 +294,14 @@ result = calculate_sum(test_numbers)</textarea>
 
     <script>
         const pythonSamples = {
+            custom: {
+                code: "",
+                description: `Enter your own Python code to translate to Java.
+• Any valid Python code will be translated
+• The semantic analysis will identify key differences
+• Try experimenting with different Python features
+• See how they map to Java constructs`
+            },
             basic: {
                 code: `# Type inference and dynamic typing
 a = 10  # Python infers type automatically
