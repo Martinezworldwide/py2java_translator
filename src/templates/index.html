@@ -601,107 +601,96 @@ if path.exists():
             outputEditor.setValue('Translating...');
             document.getElementById('differencesList').innerHTML = '<div class="loading">Analyzing differences...</div>';
             
-            // Special handling for samples 1, 2, 4, and 6
-            const sampleAnalysis = {
-                'basic': [
-                    {
-                        feature: "Type System",
-                        python: "Dynamic typing with type inference (a = 10)",
-                        java: "Static typing with explicit declarations (int a = 10)"
-                    },
-                    {
-                        feature: "Variable Assignment",
-                        python: "Multiple assignment and tuple unpacking (x, y = 1, 2)",
-                        java: "Single variable assignment per statement required"
-                    },
-                    {
-                        feature: "Type Coercion",
-                        python: "Automatic type coercion between numeric types",
-                        java: "Explicit casting required (double result = (double)intValue)"
-                    }
-                ],
-                'conditional': [
-                    {
-                        feature: "Comparison Chaining",
-                        python: "Natural syntax (if 10 < x < 20)",
-                        java: "Requires boolean operators (if (x > 10 && x < 20))"
-                    },
-                    {
-                        feature: "Pattern Matching",
-                        python: "Modern match-case with flexible patterns",
-                        java: "Traditional switch-case with limited type support"
-                    },
-                    {
-                        feature: "Boolean Evaluation",
-                        python: "Truthy/Falsy values for any type",
-                        java: "Strict boolean conditions required"
-                    }
-                ],
-                'functions': [
-                    {
-                        feature: "Function Parameters",
-                        python: "Optional parameters with default values",
-                        java: "Method overloading required for optional parameters"
-                    },
-                    {
-                        feature: "Variable Arguments",
-                        python: "*args and **kwargs for flexible arguments",
-                        java: "Varargs (...) with limited flexibility"
-                    },
-                    {
-                        feature: "Function Decorators",
-                        python: "Powerful decorator pattern with @ syntax",
-                        java: "Annotations serve different purposes"
-                    }
-                ],
-                'classes': [
-                    {
-                        feature: "Class Properties",
-                        python: "@property decorator for getter/setter behavior",
-                        java: "Explicit getter/setter methods required"
-                    },
-                    {
-                        feature: "Inheritance Model",
-                        python: "Multiple inheritance with MRO",
-                        java: "Single inheritance with interfaces"
-                    },
-                    {
-                        feature: "Special Methods",
-                        python: "Magic methods (__str__, __add__) for operator overloading",
-                        java: "toString() and explicit method names required"
-                    }
-                ]
-            };
+            // Always use the API for translation
+            fetch('/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ python_code: pythonCode }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Set the Java code with syntax highlighting
+                    outputEditor.setValue(data.java_code);
+                    outputEditor.setOption('mode', 'text/x-java');
+                    
+                    // Special handling for samples 1, 2, 4, and 6
+                    const sampleAnalysis = {
+                        'basic': [
+                            {
+                                feature: "Type System",
+                                python: "Dynamic typing with type inference (a = 10)",
+                                java: "Static typing with explicit declarations (int a = 10)"
+                            },
+                            {
+                                feature: "Variable Assignment",
+                                python: "Multiple assignment and tuple unpacking (x, y = 1, 2)",
+                                java: "Single variable assignment per statement required"
+                            },
+                            {
+                                feature: "Type Coercion",
+                                python: "Automatic type coercion between numeric types",
+                                java: "Explicit casting required (double result = (double)intValue)"
+                            }
+                        ],
+                        'conditional': [
+                            {
+                                feature: "Comparison Chaining",
+                                python: "Natural syntax (if 10 < x < 20)",
+                                java: "Requires boolean operators (if (x > 10 && x < 20))"
+                            },
+                            {
+                                feature: "Pattern Matching",
+                                python: "Modern match-case with flexible patterns",
+                                java: "Traditional switch-case with limited type support"
+                            },
+                            {
+                                feature: "Boolean Evaluation",
+                                python: "Truthy/Falsy values for any type",
+                                java: "Strict boolean conditions required"
+                            }
+                        ],
+                        'functions': [
+                            {
+                                feature: "Function Parameters",
+                                python: "Optional parameters with default values",
+                                java: "Method overloading required for optional parameters"
+                            },
+                            {
+                                feature: "Variable Arguments",
+                                python: "*args and **kwargs for flexible arguments",
+                                java: "Varargs (...) with limited flexibility"
+                            },
+                            {
+                                feature: "Function Decorators",
+                                python: "Powerful decorator pattern with @ syntax",
+                                java: "Annotations serve different purposes"
+                            }
+                        ],
+                        'classes': [
+                            {
+                                feature: "Class Properties",
+                                python: "@property decorator for getter/setter behavior",
+                                java: "Explicit getter/setter methods required"
+                            },
+                            {
+                                feature: "Inheritance Model",
+                                python: "Multiple inheritance with MRO",
+                                java: "Single inheritance with interfaces"
+                            },
+                            {
+                                feature: "Special Methods",
+                                python: "Magic methods (__str__, __add__) for operator overloading",
+                                java: "toString() and explicit method names required"
+                            }
+                        ]
+                    };
 
-            // Check if this is one of the special samples
-            if (selectedSample && sampleAnalysis[selectedSample]) {
-                // For special samples, use predefined analysis
-                outputEditor.setValue('// Java equivalent will be generated');
-                document.getElementById('differencesList').innerHTML = sampleAnalysis[selectedSample]
-                    .map(diff => `
-                        <div class="difference-item">
-                            <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
-                            <p><i class="fab fa-python"></i> Python: ${diff.python}</p>
-                            <p><i class="fab fa-java"></i> Java: ${diff.java}</p>
-                        </div>
-                    `)
-                    .join('');
-            } else {
-                // For other samples or custom code, use the API
-                fetch('/translate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ python_code: pythonCode }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        outputEditor.setValue(data.java_code);
-                        outputEditor.setOption('mode', 'text/x-java');
-                        
-                        document.getElementById('differencesList').innerHTML = data.semantic_differences
+                    // Display semantic differences based on sample or API response
+                    if (selectedSample && sampleAnalysis[selectedSample]) {
+                        document.getElementById('differencesList').innerHTML = sampleAnalysis[selectedSample]
                             .map(diff => `
                                 <div class="difference-item">
                                     <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
@@ -711,15 +700,25 @@ if path.exists():
                             `)
                             .join('');
                     } else {
-                        outputEditor.setValue(`Error: ${data.message}`);
-                        document.getElementById('differencesList').innerHTML = '';
+                        document.getElementById('differencesList').innerHTML = data.semantic_differences
+                            .map(diff => `
+                                <div class="difference-item">
+                                    <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
+                                    <p><i class="fab fa-python"></i> Python: ${diff.python}</p>
+                                    <p><i class="fab fa-java"></i> Java: ${diff.java}</p>
+                                </div>
+                            `)
+                            .join('');
                     }
-                })
-                .catch(error => {
-                    outputEditor.setValue(`Error: ${error.message}`);
+                } else {
+                    outputEditor.setValue(`Error: ${data.message}`);
                     document.getElementById('differencesList').innerHTML = '';
-                });
-            }
+                }
+            })
+            .catch(error => {
+                outputEditor.setValue(`Error: ${error.message}`);
+                document.getElementById('differencesList').innerHTML = '';
+            });
         }
     </script>
 </body>
