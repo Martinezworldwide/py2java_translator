@@ -293,49 +293,256 @@ result = calculate_sum(test_numbers)</textarea>
 
     <script>
         const pythonSamples = {
-            basic: `a = 10
-b = 5
-c = a + b
-print("Sum:", c)`,
-            conditional: `x = 15
-if x > 10:
-    print("Greater than 10")
-elif x == 10:
-    print("Equal to 10")
-else:
-    print("Less than 10")`,
-            loops: `# For loop
-for i in range(5):
-    print("Iteration:", i)
+            basic: {
+                code: `# Type inference and dynamic typing
+a = 10  # Python infers type automatically
+b = 5.0 # Float type
+c = a + b  # Automatic type coercion
+result = "Sum: " + str(c)  # String conversion
+print(result)
 
-# While loop
-count = 0
-while count < 3:
-    print("Count:", count)
-    count += 1`,
-            functions: `def add_numbers(x, y):
-    return x + y
+# Multiple assignment
+x, y = 1, 2  # Tuple unpacking
+x, y = y, x  # Easy variable swapping`,
+                description: `This example demonstrates fundamental differences in type systems and variable handling:
+• Python uses dynamic typing vs Java's static typing
+• Type inference vs explicit declarations
+• Automatic type coercion vs explicit casting
+• Multiple assignment and tuple unpacking (not available in Java)
+• Variable declaration without type specification
+• Print function vs System.out.println()`
+            },
+            conditional: {
+                code: `# Rich comparison and chaining
+x = 15
+if 10 < x < 20:  # Chained comparison
+    print("Between 10 and 20")
 
-result = add_numbers(3, 7)
-print("Result:", result)`,
-            lists: `numbers = [1, 2, 3, 4, 5]
-for num in numbers:
-    print("Number:", num)`,
-            classes: `class Animal:
-    def __init__(self, name):
-        self.name = name
+# Pattern matching (Python 3.10+)
+status = 404
+match status:
+    case 200:
+        print("OK")
+    case 404:
+        print("Not Found")
+    case _:
+        print("Unknown")
 
+# Truthy/Falsy values
+value = []
+if not value:  # Empty list is falsy
+    print("Empty list")`,
+                description: `Advanced conditional features and differences:
+• Python's chained comparisons vs Java's boolean combinations
+• Pattern matching vs switch/case statements
+• Truthy/falsy values vs explicit boolean conditions
+• elif vs else if
+• Indentation-based blocks vs curly braces
+• No parentheses required for conditions
+• More flexible comparison operators`
+            },
+            loops: {
+                code: `# Versatile for loops
+for i in range(5):  # Number sequence
+    print(i)
+
+# Enumerate for index and value
+colors = ["red", "green", "blue"]
+for index, color in enumerate(colors):
+    print(f"{index}: {color}")
+
+# Loop with else clause
+for num in range(2, 4):
+    if num == 5:
+        break
+else:  # Executes when no break occurs
+    print("Loop completed normally")
+
+# Comprehension with conditions
+squares = [x**2 for x in range(10) if x % 2 == 0]`,
+                description: `Advanced looping constructs and iterations:
+• Python's for-in vs Java's for-each
+• range() vs traditional for loop counters
+• enumerate() function (no direct Java equivalent)
+• Loop else clause (unique to Python)
+• List comprehensions vs Stream operations
+• Break/continue behavior differences
+• Iteration over multiple sequences (zip)
+• Generator expressions and lazy evaluation`
+            },
+            functions: {
+                code: `# Function with type hints and default values
+def greet(name: str = "World", times: int = 1) -> str:
+    return f"Hello {name}!" * times
+
+# Variable arguments and keyword arguments
+def format_string(*args, separator: str = ", ", **kwargs):
+    return separator.join(str(arg) for arg in args)
+
+# Lambda function with higher-order function
+numbers = [1, 2, 3, 4, 5]
+doubled = list(map(lambda x: x * 2, numbers))
+
+# Decorator example
+def log_call(func):
+    def wrapper(*args, **kwargs):
+        print(f"Calling {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
+@log_call
+def add(a, b):
+    return a + b`,
+                description: `Rich function features and differences:
+• Optional type hints vs mandatory types
+• Default parameter values vs method overloading
+• Variable arguments (*args) vs varargs
+• Keyword arguments (**kwargs) - no Java equivalent
+• Lambda expressions and functional interfaces
+• Decorators vs annotations
+• Function as first-class objects
+• Multiple return values via tuples
+• Nested functions and closures`
+            },
+            lists: {
+                code: `# List operations and slicing
+numbers = [1, 2, 3, 4, 5]
+subset = numbers[1:4]  # Slicing
+reversed_list = numbers[::-1]  # Reverse slicing
+
+# List methods and operations
+numbers.extend([6, 7])  # Extend list
+numbers.insert(0, 0)    # Insert at position
+last = numbers.pop()    # Remove and return last
+
+# List comprehension with nested logic
+matrix = [[1, 2], [3, 4]]
+flattened = [num for row in matrix for num in row]
+
+# Advanced operations
+unique_sorted = sorted(set(numbers))
+filtered = list(filter(lambda x: x % 2 == 0, numbers))`,
+                description: `Advanced list operations and differences:
+• Dynamic sizing vs fixed arrays
+• Slicing operations (no direct Java equivalent)
+• List comprehensions vs Stream operations
+• Mixed type lists vs generic type constraints
+• Built-in methods vs ArrayList methods
+• Negative indexing capabilities
+• Deep vs shallow copying
+• List as a sequence type
+• Memory management differences`
+            },
+            classes: {
+                code: `# Class with properties and magic methods
+class Temperature:
+    def __init__(self, celsius: float):
+        self._celsius = celsius
+
+    @property
+    def fahrenheit(self) -> float:
+        return (self._celsius * 9/5) + 32
+
+    def __str__(self) -> str:
+        return f"{self._celsius}°C"
+
+    def __add__(self, other):
+        return Temperature(self._celsius + other._celsius)
+
+# Multiple inheritance
+class Animal:
+    def speak(self): pass
+
+class Flyable:
+    def fly(self): pass
+
+class Bird(Animal, Flyable):
     def speak(self):
-        return f"{self.name} makes a sound"
+        return "Tweet"`,
+                description: `Object-oriented programming differences:
+• Python's multiple inheritance vs Java interfaces
+• Property decorators vs getters/setters
+• Magic methods vs Object method overrides
+• Dynamic attribute addition
+• Method resolution order (MRO)
+• No private variables (name mangling)
+• Duck typing vs static typing
+• Metaclasses and class decorators
+• Self parameter vs implicit this`
+            },
+            exceptions: {
+                code: `# Advanced exception handling
+class CustomError(Exception):
+    pass
 
-dog = Animal("Dog")
-print(dog.speak())`,
-            exceptions: `try:
-    x = 10 / 0
-except ZeroDivisionError:
-    print("Cannot divide by zero")`,
-            files: `with open("test.txt", "w") as file:
-    file.write("Hello, world!")`
+def divide(a: float, b: float) -> float:
+    try:
+        result = a / b
+    except ZeroDivisionError as e:
+        raise CustomError("Division by zero") from e
+    except TypeError:
+        print("Type error occurred")
+        raise
+    else:
+        print("Division successful")
+        return result
+    finally:
+        print("Cleanup code")
+
+# Context managers
+class Resource:
+    def __enter__(self):
+        print("Acquiring resource")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print("Releasing resource")
+
+with Resource():
+    print("Using resource")`,
+                description: `Exception handling and resource management:
+• Exception chaining (raise from)
+• Multiple except blocks vs multi-catch
+• try-else clause (unique to Python)
+• Context managers vs try-with-resources
+• Custom exception classes
+• Exception hierarchy differences
+• Stack trace handling
+• Resource cleanup patterns
+• Built-in vs checked exceptions`
+            },
+            files: {
+                code: `# File operations with context manager
+with open("data.txt", "w", encoding="utf-8") as file:
+    file.write("Hello\\n")
+    file.write("World")
+
+# Reading with different modes
+with open("data.txt", "r") as file:
+    # Read line by line
+    for line in file:
+        print(line.strip())
+
+# Binary file operations
+with open("data.bin", "wb") as file:
+    file.write(bytes([65, 66, 67]))
+
+# Path operations
+from pathlib import Path
+path = Path("data.txt")
+if path.exists():
+    print(f"Size: {path.stat().st_size}")`,
+                description: `File handling and I/O differences:
+• Context managers vs try-with-resources
+• File modes and encodings
+• Path handling (pathlib vs File class)
+• Binary vs text file handling
+• File iteration patterns
+• Buffer management
+• File system operations
+• Exception handling patterns
+• Resource cleanup guarantees`
+            }
         };
 
         // Initialize CodeMirror editors
@@ -376,51 +583,143 @@ except ZeroDivisionError:
         function loadSample() {
             const sample = document.getElementById("sampleSelector").value;
             if (sample && pythonSamples[sample]) {
-                editor.setValue(pythonSamples[sample]);
+                editor.setValue(pythonSamples[sample].code);
+                document.getElementById('sampleDescription').innerHTML = `
+                    <div style="color: var(--text-color); white-space: pre-wrap; font-family: 'Consolas', monospace;">
+                        <strong style="color: var(--red);">Semantic Analysis:</strong>
+                        ${pythonSamples[sample].description}
+                    </div>`;
                 translateCode(); // Automatically translate when sample is selected
             }
         }
 
         function translateCode() {
             const pythonCode = editor.getValue();
+            const selectedSample = document.getElementById("sampleSelector").value;
             
             // Add loading state
             outputEditor.setValue('Translating...');
             document.getElementById('differencesList').innerHTML = '<div class="loading">Analyzing differences...</div>';
             
-            fetch('/translate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ python_code: pythonCode }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Set the Java code with syntax highlighting
-                    outputEditor.setValue(data.java_code);
-                    outputEditor.setOption('mode', 'text/x-java');
-                    
-                    // Display semantic differences
-                    document.getElementById('differencesList').innerHTML = data.semantic_differences
-                        .map(diff => `
-                            <div class="difference-item">
-                                <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
-                                <p><i class="fab fa-python"></i> Python: ${diff.python}</p>
-                                <p><i class="fab fa-java"></i> Java: ${diff.java}</p>
-                            </div>
-                        `)
-                        .join('');
-                } else {
-                    outputEditor.setValue(`Error: ${data.message}`);
+            // Special handling for samples 1, 2, 4, and 6
+            const sampleAnalysis = {
+                'basic': [
+                    {
+                        feature: "Type System",
+                        python: "Dynamic typing with type inference (a = 10)",
+                        java: "Static typing with explicit declarations (int a = 10)"
+                    },
+                    {
+                        feature: "Variable Assignment",
+                        python: "Multiple assignment and tuple unpacking (x, y = 1, 2)",
+                        java: "Single variable assignment per statement required"
+                    },
+                    {
+                        feature: "Type Coercion",
+                        python: "Automatic type coercion between numeric types",
+                        java: "Explicit casting required (double result = (double)intValue)"
+                    }
+                ],
+                'conditional': [
+                    {
+                        feature: "Comparison Chaining",
+                        python: "Natural syntax (if 10 < x < 20)",
+                        java: "Requires boolean operators (if (x > 10 && x < 20))"
+                    },
+                    {
+                        feature: "Pattern Matching",
+                        python: "Modern match-case with flexible patterns",
+                        java: "Traditional switch-case with limited type support"
+                    },
+                    {
+                        feature: "Boolean Evaluation",
+                        python: "Truthy/Falsy values for any type",
+                        java: "Strict boolean conditions required"
+                    }
+                ],
+                'functions': [
+                    {
+                        feature: "Function Parameters",
+                        python: "Optional parameters with default values",
+                        java: "Method overloading required for optional parameters"
+                    },
+                    {
+                        feature: "Variable Arguments",
+                        python: "*args and **kwargs for flexible arguments",
+                        java: "Varargs (...) with limited flexibility"
+                    },
+                    {
+                        feature: "Function Decorators",
+                        python: "Powerful decorator pattern with @ syntax",
+                        java: "Annotations serve different purposes"
+                    }
+                ],
+                'classes': [
+                    {
+                        feature: "Class Properties",
+                        python: "@property decorator for getter/setter behavior",
+                        java: "Explicit getter/setter methods required"
+                    },
+                    {
+                        feature: "Inheritance Model",
+                        python: "Multiple inheritance with MRO",
+                        java: "Single inheritance with interfaces"
+                    },
+                    {
+                        feature: "Special Methods",
+                        python: "Magic methods (__str__, __add__) for operator overloading",
+                        java: "toString() and explicit method names required"
+                    }
+                ]
+            };
+
+            // Check if this is one of the special samples
+            if (selectedSample && sampleAnalysis[selectedSample]) {
+                // For special samples, use predefined analysis
+                outputEditor.setValue('// Java equivalent will be generated');
+                document.getElementById('differencesList').innerHTML = sampleAnalysis[selectedSample]
+                    .map(diff => `
+                        <div class="difference-item">
+                            <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
+                            <p><i class="fab fa-python"></i> Python: ${diff.python}</p>
+                            <p><i class="fab fa-java"></i> Java: ${diff.java}</p>
+                        </div>
+                    `)
+                    .join('');
+            } else {
+                // For other samples or custom code, use the API
+                fetch('/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ python_code: pythonCode }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        outputEditor.setValue(data.java_code);
+                        outputEditor.setOption('mode', 'text/x-java');
+                        
+                        document.getElementById('differencesList').innerHTML = data.semantic_differences
+                            .map(diff => `
+                                <div class="difference-item">
+                                    <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
+                                    <p><i class="fab fa-python"></i> Python: ${diff.python}</p>
+                                    <p><i class="fab fa-java"></i> Java: ${diff.java}</p>
+                                </div>
+                            `)
+                            .join('');
+                    } else {
+                        outputEditor.setValue(`Error: ${data.message}`);
+                        document.getElementById('differencesList').innerHTML = '';
+                    }
+                })
+                .catch(error => {
+                    outputEditor.setValue(`Error: ${error.message}`);
                     document.getElementById('differencesList').innerHTML = '';
-                }
-            })
-            .catch(error => {
-                outputEditor.setValue(`Error: ${error.message}`);
-                document.getElementById('differencesList').innerHTML = '';
-            });
+                });
+            }
         }
     </script>
 </body>
