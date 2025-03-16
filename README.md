@@ -1,4 +1,6 @@
 # Python to Java Translator
+Created by University student Sebastian Martinez - Digital Electronics & Computer Architecture class
+
 
 A modern web application that translates Python code to Java with intelligent semantic analysis, syntax highlighting, and a beautiful carbon-fiber themed UI.
 
