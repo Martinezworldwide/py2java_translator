@@ -53,11 +53,40 @@
             letter-spacing: 2px;
         }
 
-        .container {
+        .main-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 30px;
             margin-top: 20px;
+        }
+
+        .code-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sample-selector {
+            background: rgba(25, 25, 25, 0.95);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sample-selector select {
+            width: 100%;
+            padding: 10px;
+            background: #252525;
+            color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .sample-selector select:focus {
+            outline: none;
+            border-color: var(--red);
         }
 
         .code-area {
@@ -194,8 +223,8 @@
             border-radius: 4px;
         }
 
-        @media (max-width: 768px) {
-            .container {
+        @media (max-width: 1200px) {
+            .main-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -207,10 +236,31 @@
         <p>Transform your Python code into Java with intelligent semantic analysis</p>
     </div>
     
-    <div class="container">
-        <div class="code-area">
-            <h2><i class="fab fa-python"></i> Python Code</h2>
-            <textarea id="pythonCode">def calculate_sum(numbers: list) -> int:
+    <div class="main-container">
+        <div class="differences" id="semanticDifferences">
+            <h2><i class="fas fa-code-branch"></i> Semantic Differences</h2>
+            <div id="differencesList"></div>
+        </div>
+
+        <div class="code-container">
+            <div class="sample-selector">
+                <h2><i class="fas fa-list"></i> Sample Code</h2>
+                <select id="sampleSelector" onchange="loadSample()">
+                    <option value="">Select a sample...</option>
+                    <option value="basic">1. Basic Arithmetic and Variables</option>
+                    <option value="conditional">2. Conditional Statements</option>
+                    <option value="loops">3. Loops (For and While)</option>
+                    <option value="functions">4. Functions with Parameters</option>
+                    <option value="lists">5. Lists and Iteration</option>
+                    <option value="classes">6. Class and OOP</option>
+                    <option value="exceptions">7. Exception Handling</option>
+                    <option value="files">8. File Handling</option>
+                </select>
+            </div>
+
+            <div class="code-area">
+                <h2><i class="fab fa-python"></i> Python Code</h2>
+                <textarea id="pythonCode">def calculate_sum(numbers: list) -> int:
     total = 0
     for num in numbers:
         total += num
@@ -219,21 +269,64 @@
 # Test with a list
 test_numbers = [1, 2, 3, 4, 5]
 result = calculate_sum(test_numbers)</textarea>
-        </div>
-        <div class="code-area">
-            <h2><i class="fab fa-java"></i> Java Code</h2>
-            <pre id="javaCode">Translation will appear here...</pre>
-        </div>
-    </div>
+            </div>
 
-    <button onclick="translateCode()"><i class="fas fa-sync-alt"></i> Translate</button>
+            <button onclick="translateCode()"><i class="fas fa-sync-alt"></i> Translate</button>
 
-    <div class="differences" id="semanticDifferences">
-        <h2><i class="fas fa-code-branch"></i> Semantic Differences</h2>
-        <div id="differencesList"></div>
+            <div class="code-area">
+                <h2><i class="fab fa-java"></i> Java Code</h2>
+                <pre id="javaCode">Translation will appear here...</pre>
+            </div>
+        </div>
     </div>
 
     <script>
+        const pythonSamples = {
+            basic: `a = 10
+b = 5
+c = a + b
+print("Sum:", c)`,
+            conditional: `x = 15
+if x > 10:
+    print("Greater than 10")
+elif x == 10:
+    print("Equal to 10")
+else:
+    print("Less than 10")`,
+            loops: `# For loop
+for i in range(5):
+    print("Iteration:", i)
+
+# While loop
+count = 0
+while count < 3:
+    print("Count:", count)
+    count += 1`,
+            functions: `def add_numbers(x, y):
+    return x + y
+
+result = add_numbers(3, 7)
+print("Result:", result)`,
+            lists: `numbers = [1, 2, 3, 4, 5]
+for num in numbers:
+    print("Number:", num)`,
+            classes: `class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        return f"{self.name} makes a sound"
+
+dog = Animal("Dog")
+print(dog.speak())`,
+            exceptions: `try:
+    x = 10 / 0
+except ZeroDivisionError:
+    print("Cannot divide by zero")`,
+            files: `with open("test.txt", "w") as file:
+    file.write("Hello, world!")`
+        };
+
         // Initialize CodeMirror
         var editor = CodeMirror.fromTextArea(document.getElementById("pythonCode"), {
             mode: "python",
@@ -269,6 +362,14 @@ result = calculate_sum(test_numbers)</textarea>
             value: "Translation will appear here...",
             lineWrapping: true
         });
+
+        function loadSample() {
+            const sample = document.getElementById("sampleSelector").value;
+            if (sample && pythonSamples[sample]) {
+                editor.setValue(pythonSamples[sample]);
+                translateCode(); // Automatically translate when sample is selected
+            }
+        }
 
         function translateCode() {
             const pythonCode = editor.getValue();
