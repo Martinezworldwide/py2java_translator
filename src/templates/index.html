@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python to Java Translator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
+    <style>
+        .CodeMirror {
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .difference-card {
+            transition: all 0.3s ease;
+        }
+        .difference-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Python to Java Translator</h1>
+            <p class="text-gray-600">Translate Python code to Java and understand the semantic differences</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Python Input -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Python Code</h2>
+                <textarea id="pythonCode" class="w-full"></textarea>
+                <button id="translateBtn" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors">
+                    Translate
+                </button>
+            </div>
+
+            <!-- Java Output -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Java Code</h2>
+                <textarea id="javaCode" class="w-full" readonly></textarea>
+                <button id="copyBtn" class="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition-colors">
+                    Copy Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Semantic Differences -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-semibold mb-4">Semantic Differences</h2>
+            <div id="differences" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Differences will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script>
+        // Initialize CodeMirror editors
+        const pythonEditor = CodeMirror.fromTextArea(document.getElementById('pythonCode'), {
+            mode: 'python',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            autoCloseBrackets: true
+        });
+
+        const javaEditor = CodeMirror.fromTextArea(document.getElementById('javaCode'), {
+            mode: 'text/x-java',
+            theme: 'monokai',
+            lineNumbers: true,
+            readOnly: true
+        });
+
+        // Example Python code
+        pythonEditor.setValue(`from typing import List, Dict
+
+def calculate_word_frequencies(text: str) -> Dict[str, int]:
+    words = text.lower().split()
+    frequencies: Dict[str, int] = {}
+    
+    for word in words:
+        if word in frequencies:
+            frequencies[word] += 1
+        else:
+            frequencies[word] = 1
+            
+    return frequencies`);
+
+        document.getElementById('translateBtn').addEventListener('click', async () => {
+            const pythonCode = pythonEditor.getValue();
+            
+            try {
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ python_code: pythonCode })
+                });
+
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    javaEditor.setValue(data.java_code);
+                    displayDifferences(data.semantic_differences);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error translating code: ' + error.message);
+            }
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const javaCode = javaEditor.getValue();
+            navigator.clipboard.writeText(javaCode)
+                .then(() => alert('Java code copied to clipboard!'))
+                .catch(err => alert('Error copying code: ' + err));
+        });
+
+        function displayDifferences(differences) {
+            const container = document.getElementById('differences');
+            container.innerHTML = '';
+
+            differences.forEach(diff => {
+                const card = document.createElement('div');
+                card.className = 'difference-card bg-white p-6 rounded-lg shadow-md';
+                card.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-2">${diff.feature}</h3>
+                    <div class="mb-2">
+                        <span class="text-blue-600 font-medium">Python:</span>
+                        <p class="text-gray-700">${diff.python}</p>
+                    </div>
+                    <div>
+                        <span class="text-green-600 font-medium">Java:</span>
+                        <p class="text-gray-700">${diff.java}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html> 
