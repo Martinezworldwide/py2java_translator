@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from python_analyzer.analyzer import PythonAnalyzer
-from java_generator.generator import JavaGenerator
+from src.python_analyzer.analyzer import PythonAnalyzer
+from src.java_generator.generator import JavaGenerator
 from pygments import highlight
 from pygments.lexers import PythonLexer, JavaLexer
 from pygments.formatters import HtmlFormatter
