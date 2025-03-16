@@ -53,40 +53,18 @@
             letter-spacing: 2px;
         }
 
-        .main-container {
+        .container {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-top: 20px;
         }
 
-        .code-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .sample-selector {
-            background: rgba(25, 25, 25, 0.95);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .sample-selector select {
-            width: 100%;
-            padding: 10px;
-            background: #252525;
-            color: var(--text-color);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .sample-selector select:focus {
-            outline: none;
-            border-color: var(--red);
+        .analysis-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
         }
 
         .code-area {
@@ -223,8 +201,39 @@
             border-radius: 4px;
         }
 
-        @media (max-width: 1200px) {
-            .main-container {
+        .sample-selector {
+            background: rgba(25, 25, 25, 0.95);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sample-selector select {
+            width: 100%;
+            padding: 10px;
+            background: #252525;
+            color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .sample-selector select:focus {
+            outline: none;
+            border-color: var(--red);
+        }
+
+        .sample-description {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(25, 25, 25, 0.95);
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container, .analysis-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -236,15 +245,36 @@
         <p>Transform your Python code into Java with intelligent semantic analysis</p>
     </div>
     
-    <div class="main-container">
+    <div class="container">
+        <div class="code-area">
+            <h2><i class="fab fa-python"></i> Python Code</h2>
+            <textarea id="pythonCode">def calculate_sum(numbers: list) -> int:
+    total = 0
+    for num in numbers:
+        total += num
+    return total
+
+# Test with a list
+test_numbers = [1, 2, 3, 4, 5]
+result = calculate_sum(test_numbers)</textarea>
+        </div>
+        <div class="code-area">
+            <h2><i class="fab fa-java"></i> Java Code</h2>
+            <pre id="javaCode">Translation will appear here...</pre>
+        </div>
+    </div>
+
+    <button onclick="translateCode()"><i class="fas fa-sync-alt"></i> Translate</button>
+
+    <div class="analysis-container">
         <div class="differences" id="semanticDifferences">
             <h2><i class="fas fa-code-branch"></i> Semantic Differences</h2>
             <div id="differencesList"></div>
         </div>
 
-        <div class="code-container">
+        <div class="code-area">
+            <h2><i class="fas fa-list"></i> Sample Code</h2>
             <div class="sample-selector">
-                <h2><i class="fas fa-list"></i> Sample Code</h2>
                 <select id="sampleSelector" onchange="loadSample()">
                     <option value="">Select a sample...</option>
                     <option value="basic">1. Basic Arithmetic and Variables</option>
@@ -257,26 +287,7 @@
                     <option value="files">8. File Handling</option>
                 </select>
             </div>
-
-            <div class="code-area">
-                <h2><i class="fab fa-python"></i> Python Code</h2>
-                <textarea id="pythonCode">def calculate_sum(numbers: list) -> int:
-    total = 0
-    for num in numbers:
-        total += num
-    return total
-
-# Test with a list
-test_numbers = [1, 2, 3, 4, 5]
-result = calculate_sum(test_numbers)</textarea>
-            </div>
-
-            <button onclick="translateCode()"><i class="fas fa-sync-alt"></i> Translate</button>
-
-            <div class="code-area">
-                <h2><i class="fab fa-java"></i> Java Code</h2>
-                <pre id="javaCode">Translation will appear here...</pre>
-            </div>
+            <div id="sampleDescription" class="sample-description"></div>
         </div>
     </div>
 
@@ -327,7 +338,7 @@ except ZeroDivisionError:
     file.write("Hello, world!")`
         };
 
-        // Initialize CodeMirror
+        // Initialize CodeMirror editors
         var editor = CodeMirror.fromTextArea(document.getElementById("pythonCode"), {
             mode: "python",
             theme: "dracula",
@@ -349,7 +360,6 @@ except ZeroDivisionError:
             }
         });
 
-        // Initialize output area with CodeMirror (read-only)
         var outputEditor = CodeMirror(function(node) {
             var javaCode = document.getElementById("javaCode");
             javaCode.parentNode.replaceChild(node, javaCode);
