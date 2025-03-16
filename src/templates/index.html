@@ -330,27 +330,30 @@ x = 15
 if 10 < x < 20:  # Chained comparison
     print("Between 10 and 20")
 
-# Pattern matching (Python 3.10+)
+# Multiple conditions
 status = 404
-match status:
-    case 200:
-        print("OK")
-    case 404:
-        print("Not Found")
-    case _:
-        print("Unknown")
+if status == 200:
+    print("OK")
+elif status == 404:
+    print("Not Found")
+else:
+    print("Unknown")
 
 # Truthy/Falsy values
 value = []
 if not value:  # Empty list is falsy
-    print("Empty list")`,
+    print("Empty list")
+
+# Ternary operator
+age = 20
+message = "Adult" if age >= 18 else "Minor"`,
                 description: `Advanced conditional features and differences:
 • Python's chained comparisons vs Java's boolean combinations
-• Pattern matching vs switch/case statements
+• elif vs else if syntax
 • Truthy/falsy values vs explicit boolean conditions
-• elif vs else if
 • Indentation-based blocks vs curly braces
 • No parentheses required for conditions
+• Python's ternary operator vs Java's ? : operator
 • More flexible comparison operators`
             },
             loops: {
