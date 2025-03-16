@@ -4,71 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python to Java Translator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --carbon-black: #1a1a1a;
+            --navy: #1a237e;
+            --red: #d32f2f;
+            --text-color: #e0e0e0;
+            --border-radius: 10px;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: var(--carbon-black);
+            background-image: 
+                linear-gradient(45deg, rgba(30,30,30,.2) 25%, 
+                transparent 25%, transparent 75%, rgba(30,30,30,.2) 75%, rgba(30,30,30,.2)),
+                linear-gradient(45deg, rgba(30,30,30,.2) 25%, 
+                transparent 25%, transparent 75%, rgba(30,30,30,.2) 75%, rgba(30,30,30,.2));
+            background-size: 10px 10px;
+            color: var(--text-color);
         }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--navy), var(--carbon-black));
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            margin: 0;
+            color: white;
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
         .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 30px;
             margin-top: 20px;
         }
+
         .code-area {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: rgba(25, 25, 25, 0.95);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
+        .code-area h2 {
+            color: var(--red);
+            margin-top: 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         textarea {
             width: 100%;
-            height: 300px;
-            font-family: monospace;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            height: 350px;
+            font-family: 'Consolas', monospace;
+            padding: 15px;
+            background-color: #252525;
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            resize: vertical;
+            font-size: 14px;
+            line-height: 1.5;
         }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
+
         button {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, var(--red), #b71c1c);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 4px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
-            margin: 20px 0;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
         }
+
         button:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
         }
+
         .differences {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(25, 25, 25, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
+        .differences h2 {
+            color: var(--navy);
+            border-bottom: 2px solid var(--navy);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
         pre {
             white-space: pre-wrap;
             word-wrap: break-word;
-            background-color: #f8f8f8;
-            padding: 10px;
-            border-radius: 4px;
+            background-color: #252525;
+            padding: 15px;
+            border-radius: 5px;
             margin: 10px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #e0e0e0;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .difference-item {
+            background: rgba(26, 35, 126, 0.1);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .difference-item strong {
+            color: var(--red);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .difference-item p {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(37, 37, 37, 0.5);
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Python to Java Translator</h1>
-    <p>Enter your Python code below and click "Translate" to convert it to Java.</p>
+    <div class="header">
+        <h1><i class="fas fa-code"></i> Python to Java Translator</h1>
+        <p>Transform your Python code into Java with intelligent semantic analysis</p>
+    </div>
     
     <div class="container">
         <div class="code-area">
-            <h2>Python Code</h2>
+            <h2><i class="fab fa-python"></i> Python Code</h2>
             <textarea id="pythonCode" placeholder="Enter your Python code here...">def calculate_sum(numbers: list) -> int:
     total = 0
     for num in numbers:
@@ -80,15 +190,15 @@ test_numbers = [1, 2, 3, 4, 5]
 result = calculate_sum(test_numbers)</textarea>
         </div>
         <div class="code-area">
-            <h2>Java Code</h2>
+            <h2><i class="fab fa-java"></i> Java Code</h2>
             <pre id="javaCode">Translation will appear here...</pre>
         </div>
     </div>
 
-    <button onclick="translateCode()">Translate</button>
+    <button onclick="translateCode()"><i class="fas fa-sync-alt"></i> Translate</button>
 
     <div class="differences" id="semanticDifferences">
-        <h2>Semantic Differences</h2>
+        <h2><i class="fas fa-code-branch"></i> Semantic Differences</h2>
         <div id="differencesList"></div>
     </div>
 
@@ -97,7 +207,11 @@ result = calculate_sum(test_numbers)</textarea>
             const pythonCode = document.getElementById('pythonCode').value;
             const javaCodeElement = document.getElementById('javaCode');
             const differencesList = document.getElementById('differencesList');
-
+            
+            // Add loading state
+            javaCodeElement.innerHTML = 'Translating...';
+            differencesList.innerHTML = '<div class="loading">Analyzing differences...</div>';
+            
             fetch('/translate', {
                 method: 'POST',
                 headers: {
@@ -108,25 +222,25 @@ result = calculate_sum(test_numbers)</textarea>
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    javaCodeElement.innerHTML = data.java_code;
+                    javaCodeElement.innerHTML = data.highlighted_java || data.java_code;
                     
                     // Display semantic differences
                     differencesList.innerHTML = data.semantic_differences
                         .map(diff => `
-                            <div style="margin-bottom: 15px;">
-                                <strong>${diff.feature}</strong>
-                                <p>Python: ${diff.python}</p>
-                                <p>Java: ${diff.java}</p>
+                            <div class="difference-item">
+                                <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
+                                <p><i class="fab fa-python"></i> Python: ${diff.python}</p>
+                                <p><i class="fab fa-java"></i> Java: ${diff.java}</p>
                             </div>
                         `)
                         .join('');
                 } else {
-                    javaCodeElement.innerHTML = `Error: ${data.message}`;
+                    javaCodeElement.innerHTML = `<span style="color: var(--red);">Error: ${data.message}</span>`;
                     differencesList.innerHTML = '';
                 }
             })
             .catch(error => {
-                javaCodeElement.innerHTML = `Error: ${error.message}`;
+                javaCodeElement.innerHTML = `<span style="color: var(--red);">Error: ${error.message}</span>`;
                 differencesList.innerHTML = '';
             });
         }
