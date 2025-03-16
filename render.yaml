@@ -2,11 +2,13 @@ services:
   - type: web
     name: py2java-translator
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && pip install -e .
     startCommand: gunicorn --bind 0.0.0.0:$PORT src.web_app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: PORT
         value: 8000
+      - key: PYTHONPATH
+        value: /app
     plan: free 
