@@ -290,4 +290,98 @@ class JavaGenerator:
         
         self.indent_level -= 1
         java_code += f"{self._indent()}}}\n"
+        return java_code
+
+    def _generate_class(self, node: ast.ClassDef) -> str:
+        """
+        Converts a Python class to Java class.
+        
+        Args:
+            node: The class definition node
+            
+        Returns:
+            String containing the Java class
+        """
+        # Handle inheritance
+        extends = []
+        implements = []
+        for base in node.bases:
+            if isinstance(base, ast.Name):
+                extends.append(base.id)
+        
+        # Build class declaration
+        java_code = f"{self._indent()}public class {node.name}"
+        if extends:
+            # In Java, we can only extend one class, so we'll use the first one
+            java_code += f" extends {extends[0]}"
+            # Any additional bases become interfaces
+            if len(extends) > 1:
+                implements.extend(extends[1:])
+        if implements:
+            java_code += f" implements {', '.join(implements)}"
+        java_code += " {\n"
+        
+        self.indent_level += 1
+        
+        # Track instance variables for constructor
+        instance_vars = {}
+        
+        # First pass: collect instance variables and methods
+        for item in node.body:
+            if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
+                var_type = "Object"
+                if isinstance(item.annotation, ast.Name):
+                    var_type = self.type_map.get(item.annotation.id, "Object")
+                instance_vars[item.target.id] = var_type
+            elif isinstance(item, ast.Assign):
+                for target in item.targets:
+                    if isinstance(target, ast.Name):
+                        instance_vars[target.id] = "Object"  # Default type if not annotated
+        
+        # Generate constructor if __init__ is present
+        init_method = None
+        for item in node.body:
+            if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                init_method = item
+                break
+        
+        if init_method:
+            # Generate constructor
+            params = []
+            for arg in init_method.args.args[1:]:  # Skip 'self'
+                arg_type = "Object"
+                if arg.annotation and isinstance(arg.annotation, ast.Name):
+                    arg_type = self.type_map.get(arg.annotation.id, "Object")
+                params.append(f"{arg_type} {arg.arg}")
+            
+            java_code += f"{self._indent()}public {node.name}({', '.join(params)}) {{\n"
+            self.indent_level += 1
+            
+            # Add constructor body
+            for stmt in init_method.body:
+                if isinstance(stmt, ast.Assign):
+                    if isinstance(stmt.targets[0], ast.Attribute):
+                        if isinstance(stmt.targets[0].value, ast.Name) and stmt.targets[0].value.id == "self":
+                            # Convert self.attr = value to this.attr = value
+                            attr_name = stmt.targets[0].attr
+                            java_code += f"{self._indent()}this.{attr_name} = {self._generate_expression(stmt.value)};\n"
+            
+            self.indent_level -= 1
+            java_code += f"{self._indent()}}}\n\n"
+        
+        # Generate other methods
+        for item in node.body:
+            if isinstance(item, ast.FunctionDef) and item.name != "__init__":
+                # Handle special methods
+                if item.name == "__str__":
+                    item.name = "toString"
+                elif item.name == "__eq__":
+                    item.name = "equals"
+                elif item.name == "__len__":
+                    item.name = "size"
+                
+                java_code += self._generate_function(item)
+        
+        self.indent_level -= 1
+        java_code += f"{self._indent()}}}\n"
         return java_code 
