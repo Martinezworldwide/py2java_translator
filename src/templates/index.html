@@ -662,6 +662,11 @@ if path.exists():
                                 feature: "Boolean Evaluation",
                                 python: "Truthy/Falsy values for any type",
                                 java: "Strict boolean conditions required"
+                            },
+                            {
+                                feature: "Block Structure",
+                                python: "Indentation-based blocks without braces",
+                                java: "Explicit curly braces required for all blocks"
                             }
                         ],
                         'functions': [
@@ -702,7 +707,10 @@ if path.exists():
 
                     // Display semantic differences based on sample or API response
                     if (selectedSample && sampleAnalysis[selectedSample]) {
-                        document.getElementById('differencesList').innerHTML = sampleAnalysis[selectedSample]
+                        const differences = sampleAnalysis[selectedSample];
+                        console.log('Selected sample:', selectedSample); // Debug log
+                        console.log('Found differences:', differences); // Debug log
+                        document.getElementById('differencesList').innerHTML = differences
                             .map(diff => `
                                 <div class="difference-item">
                                     <strong><i class="fas fa-exclamation-circle"></i> ${diff.feature}</strong>
