@@ -36,9 +36,11 @@ class JavaGenerator:
         self.java_imports.add("import java.util.Arrays;")
         
         # Add file handling imports when needed
-        if any(isinstance(node, (ast.With, ast.Call)) and 
-               isinstance(node.func, ast.Name) and 
-               node.func.id == 'open' for node in ast.walk(tree)):
+        if any(isinstance(node, ast.With) and 
+               isinstance(node.items[0].context_expr, ast.Call) and 
+               isinstance(node.items[0].context_expr.func, ast.Name) and 
+               node.items[0].context_expr.func.id == 'open' 
+               for node in ast.walk(tree)):
             self.java_imports.add("import java.io.*;")
             self.java_imports.add("import java.nio.file.*;")
             self.java_imports.add("import java.nio.charset.StandardCharsets;")
@@ -404,50 +406,52 @@ class JavaGenerator:
         java_code = ""
         
         # Handle file operations
-        if (isinstance(node.items[0].context_expr, ast.Call) and 
-            isinstance(node.items[0].context_expr.func, ast.Name) and 
-            node.items[0].context_expr.func.id == 'open'):
-            
-            args = node.items[0].context_expr.args
-            kwargs = {kw.arg: kw.value for kw in node.items[0].context_expr.keywords}
-            
-            # Get file path
-            file_path = self._generate_expression(args[0])
-            
-            # Get mode (default to "r")
-            mode = '"r"'
-            if len(args) > 1:
-                mode = self._generate_expression(args[1])
-            elif 'mode' in kwargs:
-                mode = self._generate_expression(kwargs['mode'])
-            
-            # Get encoding (default to UTF-8)
-            encoding = 'StandardCharsets.UTF_8'
-            if 'encoding' in kwargs:
-                encoding_val = self._generate_expression(kwargs['encoding'])
-                if encoding_val == '"utf-8"':
-                    encoding = 'StandardCharsets.UTF_8'
-            
-            # Generate appropriate Java file handling code
-            if mode == '"r"':
-                java_code += f"{self._indent()}try (BufferedReader reader = Files.newBufferedReader(Paths.get({file_path}), {encoding})) {{\n"
-            elif mode == '"w"':
-                java_code += f"{self._indent()}try (BufferedWriter writer = Files.newBufferedWriter(Paths.get({file_path}), {encoding})) {{\n"
-            elif mode == '"wb"':
-                java_code += f"{self._indent()}try (OutputStream out = Files.newOutputStream(Paths.get({file_path}))) {{\n"
-            elif mode == '"rb"':
-                java_code += f"{self._indent()}try (InputStream in = Files.newInputStream(Paths.get({file_path}))) {{\n"
-            
-            self.indent_level += 1
-            
-            # Convert the body of the with statement
-            for item in node.body:
-                java_code += self._generate_from_ast(item)
-            
-            self.indent_level -= 1
-            java_code += f"{self._indent()}}}\n"
-            java_code += f"{self._indent()}catch (IOException e) {{\n"
-            java_code += f"{self._indent()}    e.printStackTrace();\n"
-            java_code += f"{self._indent()}}}\n"
-            
+        if len(node.items) > 0:  # Check if there are any items
+            item = node.items[0]
+            if (isinstance(item.context_expr, ast.Call) and 
+                isinstance(item.context_expr.func, ast.Name) and 
+                item.context_expr.func.id == 'open'):
+                
+                args = item.context_expr.args
+                kwargs = {kw.arg: kw.value for kw in item.context_expr.keywords}
+                
+                # Get file path
+                file_path = self._generate_expression(args[0])
+                
+                # Get mode (default to "r")
+                mode = '"r"'
+                if len(args) > 1:
+                    mode = self._generate_expression(args[1])
+                elif 'mode' in kwargs:
+                    mode = self._generate_expression(kwargs['mode'])
+                
+                # Get encoding (default to UTF-8)
+                encoding = 'StandardCharsets.UTF_8'
+                if 'encoding' in kwargs:
+                    encoding_val = self._generate_expression(kwargs['encoding'])
+                    if encoding_val == '"utf-8"':
+                        encoding = 'StandardCharsets.UTF_8'
+                
+                # Generate appropriate Java file handling code
+                if mode == '"r"':
+                    java_code += f"{self._indent()}try (BufferedReader reader = Files.newBufferedReader(Paths.get({file_path}), {encoding})) {{\n"
+                elif mode == '"w"':
+                    java_code += f"{self._indent()}try (BufferedWriter writer = Files.newBufferedWriter(Paths.get({file_path}), {encoding})) {{\n"
+                elif mode == '"wb"':
+                    java_code += f"{self._indent()}try (OutputStream out = Files.newOutputStream(Paths.get({file_path}))) {{\n"
+                elif mode == '"rb"':
+                    java_code += f"{self._indent()}try (InputStream in = Files.newInputStream(Paths.get({file_path}))) {{\n"
+                
+                self.indent_level += 1
+                
+                # Convert the body of the with statement
+                for item in node.body:
+                    java_code += self._generate_from_ast(item)
+                
+                self.indent_level -= 1
+                java_code += f"{self._indent()}}}\n"
+                java_code += f"{self._indent()}catch (IOException e) {{\n"
+                java_code += f"{self._indent()}    e.printStackTrace();\n"
+                java_code += f"{self._indent()}}}\n"
+        
         return java_code 
